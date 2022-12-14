@@ -6,7 +6,7 @@ const Keychain = require('keypear')
 const runKey = async (key, args) => {
   return new Promise((pass, fail) => {
     console.log('calling', key.toString('hex'), args);
-    const socket = node.connect(key);
+    const socket = node.connect(key, { reusableSocket: true });
     socket.on('open', function () {
       console.log('socket opened')
     })
@@ -31,7 +31,7 @@ module.exports = () => {
       const keys = new Keychain(kp);
       const keyPair = keys.get(command);
       console.log('serving', command, keyPair.publicKey.toString('hex'));
-      const server = node.createServer({});
+      const server = node.createServer({ reusableSocket: true });
       server.on("connection", function (socket) {
         console.log('connection', keyPair.publicKey.toString('hex'));
         socket.on('error', function (e) { throw e });
