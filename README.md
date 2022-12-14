@@ -1,7 +1,7 @@
 ### Installation
 
 ```
-npm install --save hyper-ipc
+npm install --save hyper-ipc-secure
 ```
 You can split your program into different parts, and use this library to
 get one part to ask another to run code, and receive the response, 
