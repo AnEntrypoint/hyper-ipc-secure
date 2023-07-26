@@ -20,3 +20,8 @@ UPDATE:
 There is a new webhook client available in this project, this allows you to run
 a local webhook that executes code on remote hyperswarm based nodes, giving you
 easy access to all your swarms for webhook based tools like n8n
+
+EXAMPLES:
+
+take a quick look at examples to see how to call remote code with parameters, and
+to see the webhook example
