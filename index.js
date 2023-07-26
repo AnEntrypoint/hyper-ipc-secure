@@ -23,38 +23,44 @@ const runKey = async (key, args) => {
     socket.write(pack(args));
   })
 }
-
+const serve = (kp, command, cb) => {
+  console.log({kp});
+  const keys = new Keychain(kp);
+  const keyPair = keys.get(command);
+  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
+  const server = node.createServer({ reusableSocket: true });
+  server.on("connection", function (socket) {
+    console.log('connection', keyPair.publicKey.toString('hex'));
+    socket.on('error', function (e) { throw e });
+    socket.on("data", async data => {
+      try {
+        socket.write(pack(await cb(unpack(data))));
+      } catch (error) {
+        console.trace(error);
+        socket.write(pack({ error }));
+      }
+      socket.end();
+    });
+  });
+  server.listen(keyPair);
+  console.log('running listen...')
+}
+const run = (publicKey, command, args) => {
+  console.log('run', command);
+  const keys = new Keychain(publicKey) // generate a "readonly" keychain
+  const key = keys.sub(command).publicKey;
+  console.log({keys, key})
+  return runKey(key, args)
+}
+const webhookclient = (PORT) => {
+  const {init} = require('./webhookclient.js');
+  init(PORT, {serve, run, runKey})
+}
 module.exports = () => {
   return {
-    serve: (kp, command, cb) => {
-      console.log({kp});
-      const keys = new Keychain(kp);
-      const keyPair = keys.get(command);
-      console.log('serving', command, keyPair.publicKey.toString('hex'));
-      const server = node.createServer({ reusableSocket: true });
-      server.on("connection", function (socket) {
-        console.log('connection', keyPair.publicKey.toString('hex'));
-        socket.on('error', function (e) { throw e });
-        socket.on("data", async data => {
-          try {
-            socket.write(pack(await cb(unpack(data))));
-          } catch (error) {
-            console.trace(error);
-            socket.write(pack({ error }));
-          }
-          socket.end();
-        });
-      });
-      server.listen(keyPair);
-      console.log('running listen...')
-    },
-    run: (publicKey, command, args) => {
-      console.log('run', command);
-      const keys = new Keychain(publicKey) // generate a "readonly" keychain
-      const key = keys.sub(command).publicKey;
-      console.log({keys, key})
-      return runKey(key, args)
-    },
+    webhookclient,
+    serve,
+    run,
     runKey
   }
 }
