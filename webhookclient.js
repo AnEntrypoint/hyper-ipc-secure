@@ -1,17 +1,14 @@
+
+
 module.exports = {init:(PORT, IPCNODE)=>{
-  const express = require("express")
-  const bodyParser = require("body-parser")
-  const app = express()
-  app.use(bodyParser.json())
-  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
-  app.use(bodyParser.json())
-  app.get("/:pk/:actionname", (req, res) => {
+  const run = (req, res) => {
     var params = req.params;
     let body, pk =req.params.pk;
+    console.log(req.body)
     try {
       body = JSON.parse(req.body);
     } catch(e) {
-  
+      body = req.body
     }
     console.log(req.params);
     console.log(Buffer.from(pk, 'hex'));
@@ -25,5 +22,13 @@ module.exports = {init:(PORT, IPCNODE)=>{
       res.write(JSON.stringify(err))
       res.status(500).end()
     });
-  })
+  }
+  const express = require("express")
+  const bodyParser = require("body-parser")
+  const app = express()
+  app.use(bodyParser.json())
+  app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`))
+  app.use(bodyParser.json())
+  app.get("/:pk/:actionname", run)
+  app.post("/:pk/:actionname", run)
 }}

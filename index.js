@@ -3,6 +3,10 @@ const crypto = require('hypercore-crypto')
 const { unpack, pack } = require('msgpackr');
 const node = new DHT();
 const Keychain = require('keypear')
+
+const axios = require('axios');
+
+
 const runKey = async (key, args) => {
   return new Promise((pass, fail) => {
     console.log('calling', key.toString('hex'), args);
@@ -52,13 +56,22 @@ const run = (publicKey, command, args) => {
   console.log({keys, key})
   return runKey(key, args)
 }
-const webhookclient = (PORT) => {
+const webhookclient = (PORT) => { //listens locally and calls a serve instance
   const {init} = require('./webhookclient.js');
   init(PORT, {serve, run, runKey})
+}
+const webhookserver = (kp, command, target)=>{ //starts a serve instance that calls a webhook
+  serve(kp, command, async (postData)=>{
+    return await axios.post(target, postData).data
+    .catch(error => {
+      console.error('Error:', error);
+    });  
+  })
 }
 module.exports = () => {
   return {
     webhookclient,
+    webhookserver,
     serve,
     run,
     runKey
