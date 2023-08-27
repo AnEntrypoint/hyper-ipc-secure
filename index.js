@@ -6,6 +6,7 @@ const Keychain = require('keypear')
 
 const axios = require('axios');
 
+const announces = [];
 
 const runKey = async (key, args) => {
   return new Promise((pass, fail) => {
@@ -28,7 +29,6 @@ const runKey = async (key, args) => {
   })
 }
 const serve = (kp, command, cb) => {
-  console.log({kp});
   const keys = new Keychain(kp);
   const keyPair = keys.get(command);
   console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
@@ -49,11 +49,29 @@ const serve = (kp, command, cb) => {
   server.listen(keyPair);
   console.log('running listen...')
 }
+let pools = 0;
+const serveWorker = async (kp, name, run) => {
+  if(!WorkTank) {
+    WorkTank = (await import('worktank')).default;
+  }
+  const pool = new WorkTank ({
+    name: 'workers'+(pools++),
+    size: 5,
+    timeout: 10000,
+    autoterminate: 60000,
+    methods: {run}
+  });
+  serve(kp, name, (data)=>{
+    return pool.exec ('run', [data])
+  })  
+}
+let WorkTank;
+import('worktank').then(a=>WorkTank=a);
+
 const run = (publicKey, command, args) => {
   console.log('run', command);
   const keys = new Keychain(publicKey) // generate a "readonly" keychain
   const key = keys.sub(command).publicKey;
-  console.log({keys, key})
   return runKey(key, args)
 }
 const webhookclient = (PORT) => { //listens locally and calls a serve instance
@@ -74,7 +92,8 @@ module.exports = () => {
     webhookserver,
     serve,
     run,
-    runKey
+    runKey,
+    serveWorker
   }
 }
 
