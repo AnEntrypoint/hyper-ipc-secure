@@ -1,12 +1,12 @@
 const DHT = require("@hyperswarm/dht");
-const crypto = require('hypercore-crypto')
 const { unpack, pack } = require('msgpackr');
 const node = new DHT();
 const Keychain = require('keypear')
 
 const axios = require('axios');
 
-const announces = [];
+const goodbye = require(  'graceful-goodbye')
+goodbye(() => node.destroy())
 
 const runKey = async (key, args) => {
   return new Promise((pass, fail) => {
@@ -69,7 +69,6 @@ let WorkTank;
 import('worktank').then(a=>WorkTank=a);
 
 const run = (publicKey, command, args) => {
-  console.log('run', command);
   const keys = new Keychain(publicKey) // generate a "readonly" keychain
   const key = keys.sub(command).publicKey;
   return runKey(key, args)
@@ -96,20 +95,3 @@ module.exports = () => {
     serveWorker
   }
 }
-
-async function exitHandler(options, exitCode) {
-  if (options.cleanup) console.log('DHT Cleanup');
-  if (exitCode || exitCode === 0) console.log(exitCode);
-  try {
-    await node.destroy([options])
-  } catch (e) {
-
-  }
-  if (options.exit) process.exit(1);
-}
-
-process.on('exit', exitHandler.bind(null, { cleanup: true }));
-process.on('SIGINT', exitHandler.bind(null, { exit: true }));
-process.on('SIGUSR1', exitHandler.bind(null, { exit: true }));
-process.on('SIGUSR2', exitHandler.bind(null, { exit: true }));
-process.on('uncaughtException', exitHandler.bind(null, { exit: true }));
