@@ -5,7 +5,7 @@ const Keychain = require('keypear')
 
 const axios = require('axios');
 
-const goodbye = require(  'graceful-goodbye')
+const goodbye = require('graceful-goodbye')
 goodbye(() => node.destroy())
 
 const runKey = async (key, args) => {
@@ -18,7 +18,7 @@ const runKey = async (key, args) => {
     socket.on("data", (res) => {
       socket.end();
       const out = unpack(res);
-      if(out && out.error) {
+      if (out && out.error) {
         fail(out.error);
         throw out;
       }
@@ -28,6 +28,29 @@ const runKey = async (key, args) => {
     socket.write(pack(args));
   })
 }
+
+const sockFileServe = (kp, command, file) => {
+  const keys = new Keychain(kp);
+  const keyPair = keys.get(command);
+  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
+  const server = node.createServer({ reusableSocket: true });
+  server.on("connection", function (socket) {
+    const socketFilePath = file;
+    const stream = fs.createReadStream(socketFilePath);
+    stream.pipe(socket);
+    socket.pipe(stream);
+    socket.on('error', (err) => {
+      stream.end();
+      throw e;
+    });
+    socket.on('close', () => {
+      stream.end();
+    });
+  });
+  server.listen(keyPair);
+  console.log('running sock file listen...')
+}
+
 const serve = (kp, command, cb) => {
   const keys = new Keychain(kp);
   const keyPair = keys.get(command);
@@ -50,23 +73,6 @@ const serve = (kp, command, cb) => {
   console.log('running listen...')
 }
 let pools = 0;
-const serveWorker = async (kp, name, run) => {
-  if(!WorkTank) {
-    WorkTank = (await import('worktank')).default;
-  }
-  const pool = new WorkTank ({
-    name: 'workers'+(pools++),
-    size: 5,
-    timeout: 10000,
-    autoterminate: 60000,
-    methods: {run}
-  });
-  serve(kp, name, (data)=>{
-    return pool.exec ('run', [data])
-  })  
-}
-let WorkTank;
-import('worktank').then(a=>WorkTank=a);
 
 const run = (publicKey, command, args) => {
   const keys = new Keychain(publicKey) // generate a "readonly" keychain
@@ -74,15 +80,15 @@ const run = (publicKey, command, args) => {
   return runKey(key, args)
 }
 const webhookclient = (PORT) => { //listens locally and calls a serve instance
-  const {init} = require('./webhookclient.js');
-  init(PORT, {serve, run, runKey})
+  const { init } = require('./webhookclient.js');
+  init(PORT, { serve, run, runKey })
 }
-const webhookserver = (kp, command, target)=>{ //starts a serve instance that calls a webhook
-  serve(kp, command, async (postData)=>{
+const webhookserver = (kp, command, target) => { //starts a serve instance that calls a webhook
+  serve(kp, command, async (postData) => {
     return await axios.post(target, postData).data
-    .catch(error => {
-      console.error('Error:', error);
-    });  
+      .catch(error => {
+        console.error('Error:', error);
+      });
   })
 }
 module.exports = () => {
@@ -92,6 +98,6 @@ module.exports = () => {
     serve,
     run,
     runKey,
-    serveWorker
+    sockFileServe
   }
 }
