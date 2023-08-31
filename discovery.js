@@ -1,47 +1,46 @@
 const POLL_INTERVAL = 5000;
 const schedule = [];
-const base = 1000 * 60 * 15;
+const base = 1000 * 60 * 10;
 const DHT = require('hyperdht');
 const node = new DHT();
+const goodbye = require('graceful-goodbye')
 
 const run = async () => {
     try {
+        console.log({schedule})
         for (let index in schedule) {
             const announce = schedule[index];
             if (announce.time > new Date().getTime()) {
                 announce.time = new Date().getTime() + base + parseInt(base * Math.random());
+                console.log({TIME:new Date().getTime() - announce.time})
+                console.log('announcing', schedule[index]);
+                await node.announce(announce.hash, announce.keyPair).finished();
             }
-            await node.announce(announce.hash, announce.keyPair).finished();
         }
     } catch (e) {
         console.error(e);
     }
 }
 setInterval(run, POLL_INTERVAL)
-
+run();
 async function toArray(iterable) {
     const result = []
-        for await(const data of iterable) {
-            result.push(data)
-        }
-        return result
-    }
+    for await (const data of iterable) result.push(data)
+    return result
+}
 
 module.exports = {
     announce: (name, keyPair) => {
-        const hash = DHT.hash(Buffer.from(name));
-        schedule[name] = {
-            hash,
-            keyPair,
-            time: new Date().getTime()
-        }
+        const hash = DHT.hash(Buffer.from(name))
+        schedule[name] = {hash, name, keyPair, time: new Date().getTime()}
+        run();
     },
-    unannounce: (name) => {
+    unannounce: (name)=>{
         const hash = DHT.hash(Buffer.from(name))
         delete schedule[name];
         return node.unannounce(hash, ann.keyPair).finished();
     },
-    lookup: async (name) => {
+    lookup: async (name)=>{
         console.log(node);
         const hash = DHT.hash(Buffer.from(name));
         return await toArray(node.lookup(hash));
@@ -53,36 +52,5 @@ const unannounceAll = async () => {
         await node.unannounce(ann.hash, ann.keyPair).finished();
     }
 }
-process.on("beforeExit", async (code) => {
-    await unannounceAll();
-    console.log("Process beforeExit event with code: ", code);
-});
 
-process.on("exit", async (code) => {
-    await unannounceAll();
-    console.log("Process exit event with code: ", code);
-});
-
-process.on("SIGTERM", async (signal) => {
-    await unannounceAll();
-    console.log(`Process ${
-        process.pid
-    } received a SIGTERM signal`);
-    process.exit(0);
-});
-
-process.on("SIGINT", async (signal) => {
-    await unannounceAll();
-    console.log(`Process ${
-        process.pid
-    } has been interrupted`);
-    process.exit(0);
-});
-
-process.on("uncaughtException", async (err) => {
-    await unannounceAll();
-    console.error(`Uncaught Exception: ${
-        err.message
-    }`);
-    process.exit(1);
-});
+goodbye(unannounceAll)

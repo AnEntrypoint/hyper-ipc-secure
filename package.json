@@ -1,6 +1,6 @@
 {
     "name": "hyper-ipc-secure",
-    "version": "1.4.2",
+    "version": "1.4.3",
     "description": "Hyperswarm IPC Library",
     "main": "index.js",
     "scripts": {
@@ -9,7 +9,6 @@
     "author": "lanmower",
     "license": "MIT",
     "dependencies": {
-        "@hyperswarm/dht": "^6.5.1",
         "axios": "^1.4.0",
         "body-parser": "^1.20.2",
         "compact-encoding-net": "^1.0.1",
@@ -18,8 +17,7 @@
         "hypercore-crypto": "^2.3.0",
         "hyperdht": "^6.6.1",
         "keypear": "^1.1.1",
-        "msgpackr": "^1.4.4",
-        "worktank": "^2.3.1"
+        "msgpackr": "^1.4.4"
     },
     "repository": {
         "type": "git",

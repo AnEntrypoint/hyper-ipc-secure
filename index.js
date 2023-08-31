@@ -1,4 +1,4 @@
-const DHT = require("@hyperswarm/dht");
+const DHT = require("hyperdht");
 const { unpack, pack } = require('msgpackr');
 const node = new DHT();
 const Keychain = require('keypear')
