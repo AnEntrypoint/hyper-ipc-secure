@@ -2,7 +2,7 @@ const DHT = require("@hyperswarm/dht");
 const { unpack, pack } = require('msgpackr');
 const node = new DHT();
 const Keychain = require('keypear')
-
+var net = require("net");
 const axios = require('axios');
 
 const goodbye = require('graceful-goodbye')
@@ -49,6 +49,31 @@ const sockFileServe = (kp, command, file) => {
   });
   server.listen(keyPair);
   console.log('running sock file listen...')
+}
+
+const tcpServe = (kp, command, port, host) => {
+  const keys = new Keychain(kp);
+  const keyPair = keys.get(command);
+  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
+  const server = node.createServer({ reusableSocket: true });
+  server.on("connection", function (servsock) {
+      console.log('new connection, relaying to ' + port);
+      var socket = net.connect({port, host, allowHalfOpen: true });
+      pump(servsock, socket, servsock);
+  });
+  server.listen(keyPair);
+  console.log('listening for remote connections for tcp ', port);
+}
+const tcpClient = (publicKey, command, port) => {
+  const keys = new Keychain(publicKey);
+  const keyPair = keys.get(command);
+  var server = net.createServer({allowHalfOpen: true},function (local) {
+      console.log('connecting to tcp ', port);
+      const socket = node.connect(keyPair.publicKey, { reusableSocket: true });
+      pump(local, socket, local);
+  });
+  server.listen(port, "127.0.0.1");
+  console.log('listening for local connections on tcp', port);
 }
 
 const serve = (kp, command, cb) => {
@@ -98,6 +123,8 @@ module.exports = () => {
     serve,
     run,
     runKey,
-    sockFileServe
+    sockFileServe,
+    tcpServe,
+    tcpClient
   }
 }
