@@ -41,7 +41,7 @@ const sockFileServe = (kp, command, file) => {
     socket.pipe(stream);
     socket.on('error', (err) => {
       stream.end();
-      throw e;
+      throw err;
     });
     socket.on('close', () => {
       stream.end();
