@@ -4,7 +4,7 @@ const node = new DHT();
 const Keychain = require('keypear')
 var net = require("net");
 const axios = require('axios');
-const dockerServe = require('dockerServe.js').init
+const dockerServe = require('./dockerServe.js').init
 const goodbye = require('graceful-goodbye')
 goodbye(() => node.destroy())
 
@@ -116,6 +116,7 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
       });
   })
 }
+
 module.exports = () => {
   return {
     webhookclient,
@@ -127,6 +128,5 @@ module.exports = () => {
     tcpServe,
     tcpClient,
     dockerServe,
-    wasmtimeServe
   }
 }
