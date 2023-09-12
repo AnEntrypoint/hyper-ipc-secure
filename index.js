@@ -4,7 +4,7 @@ const node = new DHT();
 const Keychain = require('keypear')
 var net = require("net");
 const axios = require('axios');
-
+const dockerServe = require('dockerServe.js').init
 const goodbye = require('graceful-goodbye')
 goodbye(() => node.destroy())
 
@@ -125,6 +125,7 @@ module.exports = () => {
     runKey,
     sockFileServe,
     tcpServe,
-    tcpClient
+    tcpClient,
+    dockerServe
   }
 }

@@ -4,14 +4,11 @@ module.exports = {init:(PORT, IPCNODE)=>{
   const run = (req, res) => {
     var params = req.params;
     let body, pk =req.params.pk;
-    console.log(req.body)
     try {
       body = JSON.parse(req.body);
     } catch(e) {
       body = req.body
     }
-    console.log(req.params);
-    console.log(Buffer.from(pk, 'hex'));
     const args = {...req.params};
     delete args.actionname;
     delete args.pk

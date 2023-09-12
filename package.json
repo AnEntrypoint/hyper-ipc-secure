@@ -1,6 +1,6 @@
 {
     "name": "hyper-ipc-secure",
-    "version": "1.4.4npm ",
+    "version": "1.4.6",
     "description": "Hyperswarm IPC Library",
     "main": "index.js",
     "scripts": {
@@ -13,11 +13,13 @@
         "body-parser": "^1.20.2",
         "compact-encoding-net": "^1.0.1",
         "express": "^4.18.2",
+        "franc-min": "^6.1.0",
         "graceful-goodbye": "^1.3.0",
         "hypercore-crypto": "^2.3.0",
         "hyperdht": "^6.6.1",
         "keypear": "^1.1.1",
-        "msgpackr": "^1.4.4"
+        "msgpackr": "^1.4.4",
+        "replace-all": "^1.0.0"
     },
     "repository": {
         "type": "git",
