@@ -126,6 +126,7 @@ module.exports = () => {
     sockFileServe,
     tcpServe,
     tcpClient,
-    dockerServe
+    dockerServe,
+    wasmtimeServe
   }
 }

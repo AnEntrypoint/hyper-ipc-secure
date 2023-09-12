@@ -1,6 +1,6 @@
 const { serve } = require('hyper-ipc');
 module.exports = {
-  init: (kp, Cmd, dockerImage) => {
+  init: (kp, dockerImage) => {
     serve(kp, command, async (postData) => {
       try {
         const container = await docker.createContainer({
