@@ -18,6 +18,9 @@ module.exports = {init:(PORT, IPCNODE)=>{
     }).catch((err)=>{
       res.write(JSON.stringify(err))
       res.status(500).end()
+    }).catch(err=>{
+      res.write(JSON.stringify(err))
+      res.status(500).end()
     });
   }
   const express = require("express")
