@@ -94,8 +94,8 @@ const runner = async (data, cb)=>{
       console.error(e);
     }
   });
-  if(typeof cbout == 'object') {
-    const out = Object.assign(cbout, stdio);
+  if(typeof cbout == 'object' || typeof cbout == 'undefined') {
+    const out = Object.assign(cbout||{}, stdio);
     return out;
   }
 }
