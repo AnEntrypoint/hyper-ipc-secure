@@ -75,6 +75,19 @@ const tcpClient = (publicKey, command, port) => {
   server.listen(port, "127.0.0.1");
   console.log('listening for local connections on tcp', port);
 }
+const { awaitSync } = require("@kaciras/deasync");
+const runner = async (data, cb)=>{
+  var capcon = require('capture-console');
+  var cbout;
+  var stdio = capcon.captureStdio(()=>{
+    cbout = awaitSync(cb(unpack(data)));
+  });
+  if(typeof cbout == 'object') {
+    console.log(cbout, stdio);
+    const out = Object.assign(cbout, stdio);
+    return out;
+  }
+}
 
 const serve = (kp, command, cb) => {
   const keys = new Keychain(kp);
@@ -86,7 +99,7 @@ const serve = (kp, command, cb) => {
     socket.on('error', function (e) { throw e });
     socket.on("data", async data => {
       try {
-        socket.write(pack(await cb(unpack(data))));
+        socket.write(pack(await runner(data, cb)));
       } catch (error) {
         console.trace(error);
         socket.write(pack({ error }));
@@ -97,7 +110,6 @@ const serve = (kp, command, cb) => {
   server.listen(keyPair);
   console.log('running listen...')
 }
-let pools = 0;
 
 const run = (publicKey, command, args) => {
   const keys = new Keychain(publicKey) // generate a "readonly" keychain
