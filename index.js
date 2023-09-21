@@ -80,10 +80,21 @@ const runner = async (data, cb)=>{
   var capcon = require('capture-console');
   var cbout;
   var stdio = capcon.captureStdio(()=>{
-    cbout = awaitSync(cb(unpack(data)));
+    try {
+      cbout = awaitSync(async ()=>{
+        try {
+          await cb(unpack(data))
+        } catch(e) {
+          console.trace(e);
+          console.error(e);
+        }
+      });
+    } catch(e) {
+      console.trace(e);
+      console.error(e);
+    }
   });
   if(typeof cbout == 'object') {
-    console.log(cbout, stdio);
     const out = Object.assign(cbout, stdio);
     return out;
   }
