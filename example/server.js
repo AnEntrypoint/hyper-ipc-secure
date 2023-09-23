@@ -8,3 +8,7 @@ node.serve(kp, 'hello.world', async (args) => {
   return {message:`henlo, ${JSON.stringify(args)}`};
 });
 
+node.serve(kp, 'error.world', async (args) => {
+  return {message:`henlo, ${JSON.stringify(args)}`};
+});
+

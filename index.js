@@ -51,8 +51,15 @@ const sockFileServe = (kp, command, file) => {
   //console.log('running sock file listen...')
 }
 
+const getSub = (kp, name) => {
+  const keys = Keychain.from(kp)
+  const sub = keys.get(name)
+  console.log({sub})
+  return sub
+}
+
 const tcpServe = (kp, command, port, host) => {
-  const keys = new Keychain(kp);
+  const keys = Keychain.from(kp);
   const keyPair = keys.get(command);
   console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
@@ -98,7 +105,7 @@ const runner = async (data, cb)=>{
 }
 
 const serve = (kp, command, cb) => {
-  const keys = new Keychain(kp);
+  const keys = Keychain.from(kp);
   const keyPair = keys.get(command);
   console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
@@ -148,5 +155,6 @@ module.exports = () => {
     tcpServe,
     tcpClient,
     dockerServe,
+    getSub
   }
 }
