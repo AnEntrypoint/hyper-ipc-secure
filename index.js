@@ -19,7 +19,6 @@ const runKey = (key, args) => {
       socket.end();
       const out = unpack(res);
       if (out && out.error) {
-        console.log("CLIENT THROW",{out})
         fail(out.error);
       } else {
         pass(out);
@@ -33,7 +32,7 @@ const runKey = (key, args) => {
 const sockFileServe = (kp, command, file) => {
   const keys = new Keychain(kp);
   const keyPair = keys.get(command);
-  //console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
+  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
   server.on("connection", function (socket) {
     const socketFilePath = file;
@@ -55,7 +54,7 @@ const sockFileServe = (kp, command, file) => {
 const tcpServe = (kp, command, port, host) => {
   const keys = new Keychain(kp);
   const keyPair = keys.get(command);
-  //console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
+  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
   server.on("connection", function (servsock) {
       //console.log('new connection, relaying to ' + port);
@@ -63,18 +62,18 @@ const tcpServe = (kp, command, port, host) => {
       pump(servsock, socket, servsock);
   });
   server.listen(keyPair);
-  //console.log('listening for remote connections for tcp ', port);
+  console.log('listening for remote connections for tcp ', port);
 }
 const tcpClient = (publicKey, command, port) => {
   const keys = new Keychain(publicKey);
   const keyPair = keys.get(command);
   var server = net.createServer({allowHalfOpen: true},function (local) {
-      //console.log('connecting to tcp ', port);
+      console.log('connecting to tcp ', port);
       const socket = node.connect(keyPair.publicKey, { reusableSocket: true });
       pump(local, socket, local);
   });
   server.listen(port, "127.0.0.1");
-  //console.log('listening for local connections on tcp', port);
+  console.log('listening for local connections on tcp', port);
 }
 const { awaitSync } = require("@kaciras/deasync");
 const runner = async (data, cb)=>{
