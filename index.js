@@ -8,8 +8,8 @@ const dockerServe = require('./dockerServe.js').init
 const goodbye = require('graceful-goodbye')
 goodbye(() => node.destroy())
 
-const runKey = async (key, args) => {
-  return new Promise((pass, fail) => {
+const runKey = (key, args) => {
+  return new Promise(async (pass, fail) => {
     console.log('calling', key.toString('hex'), args);
     const socket = node.connect(key, { reusableSocket: true });
     socket.on('open', function () {
@@ -19,12 +19,13 @@ const runKey = async (key, args) => {
       socket.end();
       const out = unpack(res);
       if (out && out.error) {
+        console.log("CLIENT THROW",{out})
         fail(out.error);
-        throw out;
+      } else {
+        pass(out);
       }
-      pass(out);
     });
-    socket.on('error', error => fail({ error }));
+    socket.on('error', error => {throw error});
     socket.write(pack(args));
   })
 }
@@ -32,7 +33,7 @@ const runKey = async (key, args) => {
 const sockFileServe = (kp, command, file) => {
   const keys = new Keychain(kp);
   const keyPair = keys.get(command);
-  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
+  //console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
   server.on("connection", function (socket) {
     const socketFilePath = file;
@@ -48,56 +49,53 @@ const sockFileServe = (kp, command, file) => {
     });
   });
   server.listen(keyPair);
-  console.log('running sock file listen...')
+  //console.log('running sock file listen...')
 }
 
 const tcpServe = (kp, command, port, host) => {
   const keys = new Keychain(kp);
   const keyPair = keys.get(command);
-  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
+  //console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
   server.on("connection", function (servsock) {
-      console.log('new connection, relaying to ' + port);
+      //console.log('new connection, relaying to ' + port);
       var socket = net.connect({port, host, allowHalfOpen: true });
       pump(servsock, socket, servsock);
   });
   server.listen(keyPair);
-  console.log('listening for remote connections for tcp ', port);
+  //console.log('listening for remote connections for tcp ', port);
 }
 const tcpClient = (publicKey, command, port) => {
   const keys = new Keychain(publicKey);
   const keyPair = keys.get(command);
   var server = net.createServer({allowHalfOpen: true},function (local) {
-      console.log('connecting to tcp ', port);
+      //console.log('connecting to tcp ', port);
       const socket = node.connect(keyPair.publicKey, { reusableSocket: true });
       pump(local, socket, local);
   });
   server.listen(port, "127.0.0.1");
-  console.log('listening for local connections on tcp', port);
+  //console.log('listening for local connections on tcp', port);
 }
 const { awaitSync } = require("@kaciras/deasync");
 const runner = async (data, cb)=>{
   var capcon = require('capture-console');
   var cbout;
+  var out;
+  const input = unpack(data);
   var stdio = capcon.captureStdio(()=>{
-    try {
-      cbout = awaitSync(async ()=>{
-        try {
-          await cb(unpack(data))
-        } catch(e) {
-          console.trace(e);
-          console.error(e);
-        }
-      });
-    } catch(e) {
-      console.trace(e);
-      console.error(e);
-    }
+    cbout = awaitSync((input)=>{
+      return new Promise(res=>{
+        res(cb(input).catch((error)=>{
+          out = {error};
+          res({error})
+        }))
+      })
+    });
   });
-  if(typeof cbout == 'object' || typeof cbout == 'undefined') {
-    const out = Object.assign(cbout||{}, stdio);
-    return out;
-  }
+  await cbout(input);
+  if(typeof out == 'object' || typeof out == 'undefined') {
+    return Object.assign(out||{}, stdio);
+  } else return out;
 }
 
 const serve = (kp, command, cb) => {
@@ -110,9 +108,9 @@ const serve = (kp, command, cb) => {
     socket.on('error', function (e) { throw e });
     socket.on("data", async data => {
       try {
-        socket.write(pack(await runner(data, cb)));
+        const output = await runner(data, cb);
+        socket.write(pack(output));
       } catch (error) {
-        console.trace(error);
         socket.write(pack({ error }));
       }
       socket.end();
