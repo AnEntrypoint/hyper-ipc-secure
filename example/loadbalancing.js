@@ -8,10 +8,12 @@ const crypto = require('hypercore-crypto');
 const kp = crypto.keyPair();
 const node = require('../index.js')();
 
-const serverKey = node.getSub(kp, 'server1'); //if its done this way, individual servers can be called directly as well as via load balancing
+ //if its done this way, individual servers can still 
+ //be called directly as well as via load balancing
+const serverKey = node.getSub(kp, 'server1');
 node.lbserve(kp, 'hello.world', serverKey)
 
-const serverKey2 = node.getSub(kp, 'server2'); //if its done this way, individual servers can be called directly as well as via load balancing
+const serverKey2 = node.getSub(kp, 'server2');
 node.lbserve(kp, 'hello.world', serverKey2)
 
 setTimeout(async function () {
