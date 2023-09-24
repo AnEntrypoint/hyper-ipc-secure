@@ -158,7 +158,7 @@ const lbserve = (kp, name, serverKey) => {
   return serverTaskKey;
 }
 
-const lbrun = async (kp, name)=>{
+const lbfind = async (kp, name)=>{
   const taskKey = getSub(kp, name)
   const results = await lookup(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])))
   const out = [];
@@ -174,8 +174,7 @@ const lbrun = async (kp, name)=>{
       throw new Error('NO NODES FOUND');
   }
   try {
-      const output = await runKey(Buffer.from(out[0], 'hex'), 'hello.world', { hello: "world" });
-      return output;
+      return out;
   } catch (e) {
       console.error("ERROR THROWN:", e)
   }
@@ -190,7 +189,7 @@ module.exports = () => {
     run,
     runKey,
     lbserve,
-    lbrun,
+    lbfind,
     sockFileServe,
     tcpServe,
     tcpClient,
