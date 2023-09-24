@@ -1,6 +1,6 @@
 {
     "name": "hyper-ipc-secure",
-    "version": "1.4.18",
+    "version": "1.4.19",
     "description": "Hyperswarm IPC Library",
     "main": "index.js",
     "scripts": {
