@@ -90,11 +90,9 @@ const runner = async (data, cb)=>{
   const input = unpack(data);
   var stdio = capcon.captureStdio(()=>{
     cbout = awaitSync((input)=>{
-      return new Promise(res=>{
-        res(cb(input).catch((error)=>{
-          out = {error};
-          res({error})
-        }))
+      return new Promise(async res=>{
+        try { out = await cb(input); res(out) }
+        catch(e) { out = {error}; res(out)}
       })
     });
   });

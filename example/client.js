@@ -1,7 +1,6 @@
 const node2 = require('../index.js')();
 const fs = require('fs');
 global.kp = JSON.parse(fs.readFileSync('kp'))
-console.log(kp)
 kp.publicKey = Buffer.from(kp.publicKey)
 kp.secretKey = Buffer.from(kp.secretKey)
 setTimeout(async function () {
