@@ -5,6 +5,8 @@ const Keychain = require('keypear')
 var net = require("net");
 const axios = require('axios');
 const dockerServe = require('./dockerServe.js').init
+const { announce, lookup } = require('./discovery.js');
+const crypto = require('hypercore-crypto');
 const goodbye = require('graceful-goodbye')
 goodbye(() => node.destroy())
 
@@ -146,6 +148,39 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
   })
 }
 
+const lbserve = (kp, name, serverKey) => {
+  const taskKey = getSub(kp, name);
+  const serverTaskKey = getSub(serverKey, 'hello.world');
+  announce(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])), serverTaskKey)
+  serveKey(serverTaskKey, async (args) => {
+      return { message: `henlo, ${JSON.stringify(args)}` };
+  });
+  return serverTaskKey;
+}
+
+const lbrun = async (kp, name)=>{
+  const taskKey = getSub(kp, name)
+  const results = await lookup(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])))
+  const out = [];
+  for (remote of results) {
+      for (peer of remote.peers) {
+          const hex = peer.publicKey.toString('hex');
+          if (!out.includes(hex)) {
+              out.push(hex)
+          }
+      }
+  }
+  if (!out.length) {
+      throw new Error('NO NODES FOUND');
+  }
+  try {
+      const output = await runKey(Buffer.from(out[0], 'hex'), 'hello.world', { hello: "world" });
+      return output;
+  } catch (e) {
+      console.error("ERROR THROWN:", e)
+  }
+}
+
 module.exports = () => {
   return {
     webhookclient,
@@ -154,6 +189,8 @@ module.exports = () => {
     serve,
     run,
     runKey,
+    lbserve,
+    lbrun,
     sockFileServe,
     tcpServe,
     tcpClient,
