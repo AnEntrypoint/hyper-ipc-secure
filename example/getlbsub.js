@@ -5,17 +5,22 @@ const node = require('../index.js')();
 const keys = [
 
 ]
+const lbserve(key, name) {
+    announce(crypto.data(Buffer.concat([key.publicKey, key.scalar])), key)
+    node.serve(kp, 'hello.world', async (args) => {
+        return { message: `henlo, ${JSON.stringify(args)}` };
+    });
+}
+
 const makeKey = ()=>{
     global.kp = crypto.keyPair()
-    console.log('KP PK', kp.publicKey.toString('hex'));
     const sub = node.getSub(kp, 'hello.world')
-    console.log('SUB PK', sub.publicKey.toString('hex'));
+    return sub;
+}
     /*const serialized = JSON.stringify(sub)
     const parsed = JSON.parse(serialized)
     parsed.publicKey = Buffer.from(par.publicKey.data);
     parsed.scalar = Buffer.from(par.scalar.data);*/
-    return sub;
-}
 for(x = 0; x < 10; x++) {
     keys.push(makeKey());
 }
@@ -23,7 +28,7 @@ for(key of keys) {
     announce(crypto.data(Buffer.concat([key.publicKey, key.scalar])), key)
 }
 for(key of keys) {
-    node.serve(kp, 'hello.world', async (args) => {
+    node.serve(key, 'hello.world', async (args) => {
         return { message: `henlo, ${JSON.stringify(args)}` };
     });
 }
