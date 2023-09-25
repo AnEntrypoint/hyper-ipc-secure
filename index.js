@@ -148,9 +148,8 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
   })
 }
 
-const lbserve = (kp, name, serverKey) => {
-  const taskKey = getSub(kp, name);
-  const serverTaskKey = getSub(serverKey, 'hello.world');
+const lbserve = (taskKey, serverKey, name) => {
+  const serverTaskKey = getSub(serverKey, name);
   announce(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])), serverTaskKey)
   serveKey(serverTaskKey, async (args) => {
       return { message: `henlo, ${JSON.stringify(args)}` };
