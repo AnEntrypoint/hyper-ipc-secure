@@ -94,7 +94,7 @@ const runner = async (data, cb) => {
     cbout = awaitSync((input) => {
       return new Promise(async res => {
         try { out = await cb(input); res(out) }
-        catch (e) { out = { error }; res(out) }
+        catch (error) { out = { error }; res(out) }
       })
     });
   });
