@@ -100,7 +100,9 @@ const runner = async (data, cb) => {
   });
   await cbout(input);
   if (typeof out == 'object' || typeof out == 'undefined') {
-    return Object.assign(out || {}, stdio);
+    const combined =Object.assign(out || {}, stdio);
+    console.log(combined);
+    return combined;
   } else return out;
 }
 
@@ -148,12 +150,11 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
   })
 }
 
-const lbserve = (taskKey, serverKey, name) => {
+const lbserve = (taskKey, serverKey, name, cb) => {
+  console.log({taskKey, serverKey, name})
   const serverTaskKey = getSub(serverKey, name);
   announce(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])), serverTaskKey)
-  serveKey(serverTaskKey, async (args) => {
-      return { message: `henlo, ${JSON.stringify(args)}` };
-  });
+  serveKey(serverTaskKey, cb);
   return serverTaskKey;
 }
 
