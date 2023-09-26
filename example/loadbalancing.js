@@ -20,9 +20,10 @@ node.lbserve(taskKey2, serverKey2)
 
 setTimeout(async function () {
     //we can run without knowing serverKey or serverKey2
-    const out = await node.lbfind(kp, 'hello.world');
+    const taskKey = getSub(kp, 'hello.world');
+    const out = await node.lbfind(taskKey);
     console.log(out)
-    const output = await node.runKey(Buffer.from(out[0], 'hex'), 'hello.world', { hello: "world" });
+    const output = await node.runKey(Buffer.from(out[0], 'hex'), { hello: "world" });
     console.log({output})
 }, 5000)
 

@@ -158,8 +158,7 @@ const lbserve = (taskKey, serverKey, name, cb) => {
   return serverTaskKey;
 }
 
-const lbfind = async (kp, name)=>{
-  const taskKey = getSub(kp, name)
+const lbfind = async (taskKey)=>{
   const results = await lookup(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])))
   const out = [];
   for (remote of results) {
