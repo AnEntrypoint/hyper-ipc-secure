@@ -56,7 +56,6 @@ const sockFileServe = (kp, command, file) => {
 const getSub = (kp, name) => {
   const keys = Keychain.from(kp)
   const sub = keys.get(name)
-  console.log({ sub })
   return sub
 }
 
@@ -151,14 +150,16 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
 }
 
 const lbserve = (taskKey, serverKey, name, cb) => {
+  console.log('serving load balanced', name)
   const serverTaskKey = getSub(serverKey, name);
-  announce(crypto.data(Buffer.concat([taskKey.publicKey])), serverTaskKey)
+  announce(crypto.data(taskKey.publicKey), serverTaskKey)
   serveKey(serverTaskKey, cb);
   return serverTaskKey;
 }
 
 const lbfind = async (taskKey)=>{
-  const results = await lookup(crypto.data(Buffer.concat([taskKey.publicKey])))
+  console.log('load balanced find: ',taskKey.publicKey.toString('hex'))
+  const results = await lookup(crypto.data(taskKey.publicKey))
   const out = [];
   for (remote of results) {
       for (peer of remote.peers) {
