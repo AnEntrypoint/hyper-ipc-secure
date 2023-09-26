@@ -151,15 +151,14 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
 }
 
 const lbserve = (taskKey, serverKey, name, cb) => {
-  console.log({taskKey, serverKey, name})
   const serverTaskKey = getSub(serverKey, name);
-  announce(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])), serverTaskKey)
+  announce(crypto.data(Buffer.concat([taskKey.publicKey])), serverTaskKey)
   serveKey(serverTaskKey, cb);
   return serverTaskKey;
 }
 
 const lbfind = async (taskKey)=>{
-  const results = await lookup(crypto.data(Buffer.concat([taskKey.publicKey, taskKey.scalar])))
+  const results = await lookup(crypto.data(Buffer.concat([taskKey.publicKey])))
   const out = [];
   for (remote of results) {
       for (peer of remote.peers) {
