@@ -36,13 +36,40 @@ Here are some examples of how to use hyper-ipc-secure:
 - Calling remote code with parameters:
 
 ```javascript
-// Code example goes here
+const hyperIpc = require('hyper-ipc-secure');
+
+// Initialize the client
+const client = new hyperIpc.Client('myPublicKey', 'myEndpointName');
+
+// Call a remote function with parameters
+client.call('remoteFunction', 'param1', 'param2')
+  .then(response => {
+    console.log(response);
+  })
+  .catch(error => {
+    console.error(error);
+  });
 ```
 
 - Using the webhook example:
 
 ```javascript
-// Code example goes here
+const hyperIpc = require('hyper-ipc-secure');
+
+// Initialize the webhook client
+const webhookClient = new hyperIpc.WebhookClient('myPublicKey', 'myEndpointName');
+
+// Register a webhook
+webhookClient.register('myWebhook', (req, res) => {
+  // Handle the webhook request here
+  console.log(req.body);
+
+  // Send a response
+  res.send('Webhook received!');
+});
+
+// Start the webhook client
+webhookClient.start();
 ```
 
 Please refer to the examples directory for more detailed examples.
