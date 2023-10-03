@@ -4,7 +4,8 @@
     "description": "Hyperswarm IPC Library",
     "main": "index.js",
     "scripts": {
-        "start": "node example/server.js"
+        "start": "node example/server.js",
+        "release": "git commit -a -m ranrelease && npm version $(semver $npm_package_version -i patch) && npm publish --tag latest"
     },
     "author": "lanmower",
     "license": "MIT",
