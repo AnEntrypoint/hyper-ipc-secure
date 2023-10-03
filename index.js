@@ -12,11 +12,7 @@ goodbye(() => node.destroy())
 
 const runKey = (key, args) => {
   return new Promise(async (pass, fail) => {
-    console.log('calling', key.toString('hex'), args);
     const socket = node.connect(key, { reusableSocket: true });
-    socket.on('open', function () {
-      console.log('socket opened')
-    })
     socket.on("data", (res) => {
       socket.end();
       const out = unpack(res);
@@ -34,7 +30,6 @@ const runKey = (key, args) => {
 const sockFileServe = (kp, command, file) => {
   const keys = new Keychain(kp);
   const keyPair = keys.get(command);
-  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
   server.on("connection", function (socket) {
     const socketFilePath = file;
@@ -50,7 +45,6 @@ const sockFileServe = (kp, command, file) => {
     });
   });
   server.listen(keyPair);
-  //console.log('running sock file listen...')
 }
 
 const getSub = (kp, name) => {
@@ -62,26 +56,21 @@ const getSub = (kp, name) => {
 const tcpServe = (kp, command, port, host) => {
   const keys = Keychain.from(kp);
   const keyPair = keys.get(command);
-  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   const server = node.createServer({ reusableSocket: true });
   server.on("connection", function (servsock) {
-    //console.log('new connection, relaying to ' + port);
     var socket = net.connect({ port, host, allowHalfOpen: true });
     pump(servsock, socket, servsock);
   });
   server.listen(keyPair);
-  console.log('listening for remote connections for tcp ', port);
 }
 const tcpClient = (publicKey, command, port) => {
   const keys = new Keychain(publicKey);
   const keyPair = keys.get(command);
   var server = net.createServer({ allowHalfOpen: true }, function (local) {
-    console.log('connecting to tcp ', port);
     const socket = node.connect(keyPair.publicKey, { reusableSocket: true });
     pump(local, socket, local);
   });
   server.listen(port, "127.0.0.1");
-  console.log('listening for local connections on tcp', port);
 }
 const { awaitSync } = require("@kaciras/deasync");
 const runner = async (data, cb) => {
@@ -108,7 +97,6 @@ const runner = async (data, cb) => {
 const serveKey = (keyPair, cb) => {
   const server = node.createServer({ reusableSocket: true });
   server.on("connection", function (socket) {
-    console.log('connection', keyPair.publicKey.toString('hex'));
     socket.on('error', function (e) { throw e });
     socket.on("data", async data => {
       try {
@@ -121,13 +109,11 @@ const serveKey = (keyPair, cb) => {
     });
   });
   server.listen(keyPair);
-  console.log('listening to', keyPair.publicKey.toString('hex'))
 }
 
 const serve = (kp, command, cb) => {
   const keys = Keychain.from(kp);
   const keyPair = keys.get(command);
-  console.log(`serving ${kp.publicKey.toString('hex')}/${command}`, keyPair.publicKey.toString('hex'));
   serveKey(keyPair, cb);
 }
 
@@ -150,7 +136,6 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
 }
 
 const lbserve = (taskKey, serverKey, name, cb) => {
-  console.log('serving load balanced', name)
   const serverTaskKey = getSub(serverKey, name);
   announce(crypto.data(taskKey.publicKey), serverTaskKey)
   serveKey(serverTaskKey, cb);
@@ -158,7 +143,6 @@ const lbserve = (taskKey, serverKey, name, cb) => {
 }
 
 const lbfind = async (taskKey)=>{
-  console.log('load balanced find: ',taskKey.publicKey.toString('hex'))
   const results = await lookup(crypto.data(taskKey.publicKey))
   const out = [];
   for (remote of results) {

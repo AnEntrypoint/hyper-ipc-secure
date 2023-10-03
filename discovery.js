@@ -12,7 +12,6 @@ const run = async () => {
             const announce = schedule[index];
             if (announce.time < new Date().getTime()) {
                 announce.time = new Date().getTime() + base + parseInt(base * Math.random());
-                console.log('announcing', announce.hash.toString('hex'), announce.keyPair.publicKey.toString('hex'));
                 await node.announce(announce.hash, announce.keyPair).finished();
             }
         }
@@ -32,7 +31,6 @@ module.exports = {
     announce: (name, keyPair) => {
         const hash = DHT.hash(Buffer.from(name))
         const keys = Keychain.from(keyPair).get();
-        console.log("ADDING ANNOUNCE")
         schedule[name.toString('hex')+keys.publicKey.toString('hex')] = {hash, name:name.toString('hex'), keyPair:keys, time: new Date().getTime()}
         run();
     },
