@@ -177,6 +177,8 @@ module.exports = () => {
     tcpServe,
     tcpClient,
     dockerServe,
-    getSub
+    getSub,
+    announce,
+    lookup
   }
 }
