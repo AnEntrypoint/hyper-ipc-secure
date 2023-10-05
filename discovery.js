@@ -12,6 +12,7 @@ const run = async () => {
             const announce = schedule[index];
             if (announce.time < new Date().getTime()) {
                 announce.time = new Date().getTime() + base + parseInt(base * Math.random());
+                console.log("ANOUNCING:", announce.hash);
                 await node.announce(announce.hash, announce.keyPair).finished();
             }
         }
@@ -41,6 +42,7 @@ module.exports = {
     },
     lookup: async (name)=>{
         const hash = DHT.hash(Buffer.from(name));
+        console.log("ANOUNCING:", hash);
         return await toArray(node.lookup(hash));
     }
 }
