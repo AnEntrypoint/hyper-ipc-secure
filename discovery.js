@@ -12,7 +12,7 @@ const run = async () => {
             const announce = schedule[index];
             if (announce.time < new Date().getTime()) {
                 announce.time = new Date().getTime() + base + parseInt(base * Math.random());
-                console.log("ANOUNCING:", announce.hash);
+                console.log("ANOUNCING:", announce.hash.toString('hex'));
                 await node.announce(announce.hash, announce.keyPair).finished();
             }
         }
