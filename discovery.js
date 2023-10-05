@@ -48,7 +48,7 @@ module.exports = {
 }
 
 const unannounceAll = async () => {
-    console.log('cleaning up before close')
+    console.log({schedule})
     for (ann of schedule) {
         console.log("UNANOUNCING:", ann.hash.toString('hex'));
 
@@ -56,4 +56,7 @@ const unannounceAll = async () => {
     }
 }
 
-goodbye(unannounceAll)
+goodbye(()=>{
+    console.log('cleaning up before close')
+    unannounceAll()
+})
