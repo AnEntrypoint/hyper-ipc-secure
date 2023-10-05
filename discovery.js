@@ -54,7 +54,7 @@ const unannounceAll = async () => {
         console.log({ann})
         console.log("UNANOUNCING:", ann.hash.toString('hex'));
 
-        await node.unannounce(ann.hash, ann.keyPair).finished();
+        await node.unannounce(ann.hash, ann.keyPair);
     }
 }
 
