@@ -49,7 +49,9 @@ module.exports = {
 
 const unannounceAll = async () => {
     console.log({schedule})
-    for (ann of schedule) {
+    for (i in schedule) {
+        const ann = schedule[i];
+        console.log({ann})
         console.log("UNANOUNCING:", ann.hash.toString('hex'));
 
         await node.unannounce(ann.hash, ann.keyPair).finished();
