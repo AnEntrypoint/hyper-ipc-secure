@@ -42,13 +42,15 @@ module.exports = {
     },
     lookup: async (name)=>{
         const hash = DHT.hash(Buffer.from(name));
-        console.log("ANOUNCING:", hash);
+        console.log("LOOKING UP:", hash);
         return await toArray(node.lookup(hash));
     }
 }
 
 const unannounceAll = async () => {
     for (ann of schedule) {
+        console.log("UNANOUNCING:", announce.hash.toString('hex'));
+
         await node.unannounce(ann.hash, ann.keyPair).finished();
     }
 }
