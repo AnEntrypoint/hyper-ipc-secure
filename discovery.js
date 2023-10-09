@@ -12,7 +12,7 @@ const run = async () => {
             const announce = schedule[index];
             if (announce.time < new Date().getTime()) {
                 announce.time = new Date().getTime() + base + parseInt(base * Math.random());
-                console.log("ANOUNCING:", announce.hash.toString('hex'));
+                console.log("ANOUNCING:", announce.hash.toString('hex'), announce.keyPair.publicKey.toString('hex'));
                 await node.announce(announce.hash, announce.keyPair).finished();
             }
         }
@@ -29,15 +29,13 @@ async function toArray(iterable) {
 }
 
 module.exports = {
-    announce: (name, keyPair) => {
+    announce: (name, keys) => {
         const hash = DHT.hash(Buffer.from(name))
-        const keys = Keychain.from(keyPair).get();
         schedule[name.toString('hex')+keys.publicKey.toString('hex')] = {hash, name:name.toString('hex'), keyPair:keys, time: new Date().getTime()}
         run();
     },
-    unannounce: (name, keyPair)=>{
+    unannounce: (name, keys)=>{
         delete schedule[name];
-        const keys = Keychain.from(keyPair).get();
         return node.unannounce(name.toString('hex')+keys.publicKey.toString('hex'), ann.keyPair).finished();
     },
     lookup: async (name)=>{
@@ -50,7 +48,7 @@ module.exports = {
 const unannounceAll = async () => {
     for (i in schedule) {
         const ann = schedule[i];
-        console.log("UNANOUNCING:", ann.hash.toString('hex'));
+        console.log("UNANOUNCING:", ann.hash.toString('hex'), ann.keyPair.publicKey.toString('hex'));
         await node.unannounce(ann.hash, ann.keyPair);
     }
 }
