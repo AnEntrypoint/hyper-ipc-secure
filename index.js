@@ -137,13 +137,13 @@ const webhookserver = (kp, command, target) => { //starts a serve instance that 
 
 const lbserve = (taskKey, serverKey, name, cb) => {
   const serverTaskKey = getSub(serverKey, name);
-  announce(crypto.data(taskKey.publicKey), serverTaskKey)
+  announce(taskKey.publicKey, serverTaskKey)
   serveKey(serverTaskKey, cb);
   return serverTaskKey;
 }
 
 const lbfind = async (taskKey)=>{
-  const results = await lookup(crypto.data(taskKey.publicKey))
+  const results = await lookup(taskKey.publicKey)
   const out = [];
   for (remote of results) {
       for (peer of remote.peers) {
