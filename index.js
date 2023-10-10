@@ -10,7 +10,7 @@ const crypto = require('hypercore-crypto');
 const goodbye = require('graceful-goodbye')
 goodbye(() => node.destroy())
 
-const runKey = (key, args, options={ reusableSocket: true }) => {
+const runKey = (key, args, options={ reusableSocket: false }) => {
   return new Promise(async (pass, fail) => {
     const socket = node.connect(key, options);
     socket.on("data", (res) => {
@@ -94,8 +94,8 @@ const runner = async (data, cb) => {
   } else return out;
 }
 
-const serveKey = (keyPair, cb) => {
-  const server = node.createServer({ reusableSocket: true });
+const serveKey = (keyPair, cb, options={ reusableSocket: false }) => {
+  const server = node.createServer(options);
   server.on("connection", function (socket) {
     socket.on('error', function (e) { throw e });
     socket.on("data", async data => {

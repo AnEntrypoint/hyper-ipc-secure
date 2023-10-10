@@ -49,7 +49,12 @@ const unannounceAll = async () => {
     for (i in schedule) {
         const ann = schedule[i];
         console.log("UNANOUNCING:", ann.hash.toString('hex'), ann.keyPair.publicKey.toString('hex'));
-        await node.unannounce(ann.hash, ann.keyPair);
+        try {
+            await node.unannounce(ann.hash, ann.keyPair);
+        } catch(e) {
+            console.error(e);
+        }
+        
     }
 }
 
